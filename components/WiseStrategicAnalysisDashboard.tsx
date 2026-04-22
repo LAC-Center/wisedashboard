@@ -263,7 +263,7 @@ function computeScenario(baseRows: Corridor[], a: Assumptions) {
     .map((r, i) => ({
       ...r,
       priorityScore:
-        0.55 * r.misScore + 0.25 * revenueNorm[i] + 0.2 * captureNorm[i],
+        0.6 * revenueNorm[i] + 0.4 * captureNorm[i],
       rank: 0,
     }))
     .sort((a, b) => b.priorityScore - a.priorityScore)
@@ -365,7 +365,6 @@ function computeScenario(baseRows: Corridor[], a: Assumptions) {
     rows,
     summary,
     phaseGroups,
-    revenueMix,
     riskRows,
     earlySignals,
     failureSignals,
@@ -488,11 +487,15 @@ export default function WiseStrategicAnalysisPage() {
     rows,
     summary,
     phaseGroups,
-    revenueMix,
     riskRows,
     earlySignals,
     failureSignals,
   } = useMemo(() => computeScenario(baseData, assumptions), [assumptions]);
+
+  const revenueMix = useMemo(() => [
+    { name: "Transaction Fees", value: summary.totalFeeRevenueM },
+    { name: "Interest Income", value: summary.interestIncomeM },
+  ], [summary]);
 
   const operatingLeverageData = useMemo(() => {
     const maxVolume = Math.max(summary.targetCaptureBn * 2, 5);
@@ -716,9 +719,9 @@ export default function WiseStrategicAnalysisPage() {
                       />
                       <ZAxis
                         type="number"
-                        dataKey="estimatedFeeRevenueM"
+                        dataKey="priorityScore"
                         range={[80, 500]}
-                        name="Est. Fee Revenue ($M)"
+                        name="Priority Score"
                       />
                       <Tooltip
                         formatter={(value: number | string, name: string) => [
